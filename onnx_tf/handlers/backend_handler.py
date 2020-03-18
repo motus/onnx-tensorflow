@@ -181,9 +181,8 @@ class BackendHandler(Handler):
     attrs = {p: attrs[p] for p in params if p in attrs}
     # Hack to prevent clash between
     # parameter "name" and kwarg "name" in tf.pad():
-    if tf_func == tf.pad and len(inputs) == 5 \
-        and inputs[3] is None and attrs.get("name") is not None:
+    if tf_func == tf.pad and len(inputs) == 5 and inputs[3] is None and "name" in attrs:
       inputs[3] = attrs["name"]
-       del attrs["name"]
+      del attrs["name"]
 
     return tf_func(*inputs, **attrs)
