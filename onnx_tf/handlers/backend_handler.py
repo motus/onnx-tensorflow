@@ -178,5 +178,12 @@ class BackendHandler(Handler):
         params = inspect.getargspec(tf_func).args
 
     attrs = cls._process_attrs(attrs)
-    return tf_func(*inputs,
-                   **dict([(p, attrs[p]) for p in params if p in attrs]))
+    attrs = {p: attrs[p] for p in params if p in attrs}
+    # Hack to prevent clash between
+    # parameter "name" and kwarg "name" in tf.pad():
+    if tf_func == tf.pad and len(inputs) == 5 \
+        and inputs[3] is None and attrs.get("name") is not None:
+      inputs[3] = attrs["name"]
+       del attrs["name"]
+
+    return tf_func(*inputs, **attrs)
